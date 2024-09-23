@@ -1,0 +1,7 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Mon Sep 23 19:58:23 UTC 2024","Mon Sep 23 19:58:23 UTC 2024","246","","","","","","Create a new user",""
+"passed","Mon Sep 23 19:58:22 UTC 2024","Mon Sep 23 19:58:22 UTC 2024","154","","","","","","Get all users",""
+"passed","Mon Sep 23 19:58:22 UTC 2024","Mon Sep 23 19:58:23 UTC 2024","276","","","","","","Check Wrong Endpoint",""
+"broken","Mon Sep 23 19:58:25 UTC 2024","Mon Sep 23 19:58:25 UTC 2024","8","","","","","","Fail This Test For Report -- @1.1 ",""
+"broken","Mon Sep 23 14:06:56 UTC 2024","Mon Sep 23 14:06:56 UTC 2024","3","","","","","","Fail Test",""
+"passed","Mon Sep 23 19:58:23 UTC 2024","Mon Sep 23 19:58:25 UTC 2024","1817","","","","","","Valid login to katalon-demo-cura application -- @1.1 ",""

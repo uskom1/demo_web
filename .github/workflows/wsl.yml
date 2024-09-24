@@ -26,7 +26,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          path: ${{ github.sha }}
+          set-safe-directory: '/home/uskom/github'
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v5

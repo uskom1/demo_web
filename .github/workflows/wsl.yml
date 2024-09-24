@@ -1,20 +1,22 @@
-name: CI
+name: CI_WSL
 
-on:
-  push:
-    branches:
-      - mustafa-demo
-  pull_request:
-    branches:
-      - mustafa-demo
+on: [push]
 
 jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu:20.04]
+        python-version: ["3.9", "3.10", "3.11", "pypy3.9", "pypy3.10"]
+
   docker_build:
     runs-on: wsl
-
+    needs: build
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Build the Docker image from the Dockerfile
       - name: Build Docker image
@@ -27,6 +29,7 @@ jobs:
 
   test:
     runs-on: wsl
+    needs: docker_build
 
     steps:
       - uses: actions/checkout@v4
@@ -60,11 +63,6 @@ jobs:
         run: |
           mkdir -p features/reports/allure-results/history
 
-      # Step to retrieve previous Allure history from a branch
-      - name: Download Allure history from branch
-        run: |
-          git fetch origin allure-history-branch
-          git checkout origin/allure-history-branch -- features/reports/allure-results/history || echo "No previous history found"
 
       - name: Run tests and generate Allure results
         run: |
@@ -77,64 +75,25 @@ jobs:
 
       - name: Generate Allure Report
         run: |
-          allure generate features/reports/allure-results -o features/allure-report --clean
+          allure generate features/reports/allure-results -o features/allure-report 
 
       - name: Upload Allure HTML report as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: allure-html-report
           path: features/allure-report
           retention-days: 5
-
-      - name: Handle untracked files (move to temp)
-        run: |
-          mkdir -p temp
-          mv features/allure-report/* temp/ || echo "No files to move"
-
-      - name: Commit and push Allure history to branch
-        run: |
-          git config pull.rebase false
-          git config --local user.name "GitHub Actions"
-          git config --local user.email "actions@github.com"
-          
-          # Add all changes or stash untracked ones
-          git add --all || git stash
-
-          # Fetch the latest history branch
-          git fetch origin allure-history-branch
-
-          # Checkout the history branch
-          git checkout allure-history-branch || git checkout -b allure-history-branch
-
-          # Pull changes and merge allowing unrelated histories
-          git pull origin allure-history-branch --no-edit --allow-unrelated-histories || echo "No changes to pull"
-
-          # Add the directories to track history and reports
-          git add features/reports/ features/allure-report/ features/reports/allure-results/
-
-          # Commit the changes if any
-          git commit -m "Update Allure history and report" || echo "No changes to commit"
-
-          # Push changes back to the branch with force to ensure sync
-          git push origin allure-history-branch --force
 
   deploy:
     runs-on: wsl
     needs: test
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download Allure Report artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: allure-html-report
           path: features/allure-report
 
-      - name: Deploy Allure report to a separate branch
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./features/allure-report
-          publish_branch: main
-          force_orphan: true
